@@ -1,160 +1,90 @@
-# SalleDispo
-Application web temps réel pour la gestion et l'affichage des disponibilités de salles universitaires via l'analyse de calendriers ICS.
+# SALLEDISPO - GESTIONNAIRE DE SALLES EN TEMPS REEL
 
-========================================================================
-SalleDispo - APPLICATION DE GESTION DE SALLES EN TEMPS REEL
-========================================================================
+## DESCRIPTION
 
-DESCRIPTION
------------
-SalleDispo est une application web intelligente destinee aux IUT et Universites. 
-Elle permet aux etudiants et au personnel de trouver instantanement une salle libre 
-pour travailler, en agregeant et en analysant les emplois du temps (fichiers ICS) 
-de l'etablissement en temps reel.
+SalleDispo est une application web intelligente destinée aux IUT et Universités. Elle permet aux étudiants et au personnel de trouver instantanément une salle libre pour travailler, en agrégeant et en analysant les emplois du temps (fichiers ICS) de l'établissement en temps réel.
 
-L'objectif est d'optimiser l'occupation des locaux et de reduire le temps perdu 
-a chercher une salle disponible.
+L'objectif est d'optimiser l'occupation des locaux et de réduire le temps perdu à chercher une salle disponible dans les couloirs.
 
-=====================
-CONTEXTE ET BESOIN
-=====================
+---
 
-1. LE PROBLEME
-   - Les emplois du temps changent constamment.
-   - Trouver une salle libre implique souvent de verifier physiquement chaque salle.
-   - L'information de disponibilite est souvent cloisonnee ou difficile d'acces.
+## CONTEXTE ET BESOIN
 
-2. LA SOLUTION
-   CampusDispo centralise ces donnees dans une interface web responsive :
-   - Lecture automatique des calendriers .ics des salles.
-   - Calcul en temps reel de l'occupation.
-   - Affichage des equipements (PC, Projecteur) et localisation.
-   - Systeme de signalement d'incidents materiels.
+### 1. Le Problème
+* Les emplois du temps changent constamment et les informations sur l'ENT ne sont pas toujours faciles d'accès rapidement.
+* Trouver une salle libre implique souvent de vérifier physiquement chaque salle.
+* L'information de disponibilité est souvent cloisonnée.
 
-========================================================================
-FONCTIONNALITES CLES
-========================================================================
+### 2. La Solution
+SalleDispo centralise ces données dans une interface web responsive :
+* Lecture automatique des calendriers ICS des salles (compatible exports ADE/ENT).
+* Calcul en temps réel de l'occupation (Libre / Occupé / Bientôt occupée).
+* Affichage des équipements (PC, Projecteur) et de la localisation.
+* Système collaboratif de signalement d'incidents matériels.
 
-A. RECHERCHE ET FILTRAGE
-   - Disponibilite Temps Reel : Algorithme de detection des creneaux libres.
-   - Calcul de progression : Barre visuelle indiquant l'avancement du cours actuel.
-   - Filtres Avances : Par equipements, localisation (etage, aile) et duree.
-   - Tri Automatique : Mise en avant des salles libres.
+---
 
-B. MODE "KIOSQUE" (FONCTIONNALITE TV)
-   Une interface dediee aux ecrans TV presents dans les halls ou salles de projet :
-   - Accessible sans authentification (Bouton d'acces rapide).
-   - Design sombre (Dark Mode) pour le confort visuel et l'economie d'energie.
-   - Defilement automatique (Auto-scroll) intelligent pour afficher toutes les salles.
-   - Rafraichissement automatique des donnees toutes les 2 minutes.
+## FONCTIONNALITES CLES
 
-C. MAINTENANCE ET SIGNALEMENT
-   - Formulaire permettant aux utilisateurs de signaler un probleme (panne PC, menage...).
-   - Affichage d'une alerte sur le tableau de bord pour prevenir les usagers.
-   - Historique des signalements stocke en JSON.
+### A. Recherche et Filtrage Avancé
+* **Disponibilité Temps Réel :** Algorithme de détection des créneaux libres avec gestion précise des fuseaux horaires.
+* **Calcul de progression :** Barre visuelle indiquant l'avancement du cours actuel (pour savoir si la salle se libère bientôt).
+* **Filtres Multi-critères :** Possibilité de filtrer par équipements (PC, Vidéo-projecteur), par localisation (étage, aile gauche/droite) et par durée disponible minimale.
+* **Tri Automatique :** Mise en avant prioritaire des salles libres.
 
-D. SECURITE ET CONFIDENTIALITE
-   - Authentification : Distingue les etudiants des administrateurs.
-   - Anonymisation : Le detail du cours (nom du professeur) est masque pour les etudiants (RGPD).
-   - Filtrage IP (Optionnel) : Restriction de l'acces au reseau Wi-Fi de l'etablissement.
+### B. Mode Kiosque (Fonctionnalité TV)
+Une interface spécifique dédiée aux écrans TV présents dans les halls d'entrée ou les salles de projet :
+* **Accessible sans authentification** via un bouton d'accès rapide.
+* **Design "Dark Mode"** (Fond noir) pour le confort visuel et la protection des écrans.
+* **Défilement automatique (Auto-scroll)** intelligent pour afficher l'ensemble des salles sans interaction humaine.
+* **Rafraîchissement automatique** des données toutes les 2 minutes.
 
-========================================================================
-STACK TECHNIQUE
-========================================================================
+### C. Maintenance et Signalement
+* Formulaire permettant aux utilisateurs de signaler un problème technique (panne PC, ménage nécessaire, matériel manquant).
+* Affichage d'une alerte visuelle sur le tableau de bord pour prévenir les autres usagers.
+* Historique des signalements stocké dans un fichier JSON persistant.
 
-BACKEND : Python (Flask)
-   - icalendar : Parsing des fichiers .ics (compatible ADE / Google Calendar).
-   - pytz : Gestion des fuseaux horaires (Europe/Paris).
-   - Flask-Login : Gestion des sessions utilisateurs.
+### D. Sécurité et Confidentialité
+* **Authentification :** Distinction des rôles entre "Étudiant" (Vue restreinte) et "Administrateur" (Vue détaillée).
+* **Anonymisation RGPD :** Le détail du cours (nom du professeur, matière exacte) est masqué pour les étudiants (remplacé par "Occupé"), seul l'administrateur voit le détail.
+* **Filtrage IP (Optionnel) :** Fonctionnalité de restriction d'accès permettant d'autoriser l'application uniquement depuis le réseau Wi-Fi de l'établissement (protection contre les accès extérieurs).
 
-FRONTEND : HTML5, CSS3, Bootstrap 5.3
-   - Interface responsive (Mobile / Desktop / TV).
-   - Design moderne type "Glassmorphism".
+---
 
-DONNEES : Stockage Fichier (JSON)
-   - Configuration legere ne necessitant pas de serveur SQL lourd.
+## STACK TECHNIQUE
 
-========================================================================
-STRUCTURE DU PROJET
-========================================================================
+* **Backend :** Python 3.10+ avec Framework Flask.
+    * Librairie `icalendar` : Parsing des fichiers ICS.
+    * Librairie `pytz` : Gestion des fuseaux horaires (Europe/Paris).
+    * `Flask-Login` : Gestion sécurisée des sessions utilisateurs.
+* **Frontend :** HTML5, CSS3, Bootstrap 5.3.
+    * Interface responsive adaptée aux Mobiles, Desktop et Ecrans TV.
+    * Design moderne type "Glassmorphism".
+* **Données :** Stockage Fichier (JSON).
+    * Architecture légère sans base de données SQL (NoSQL file-based) pour faciliter le déploiement et la maintenance.
 
-/CampusDispo
-|-- app.py                 # Coeur de l'application (Routes, Logique metier)
-|-- config.json            # Configuration des salles (Places, Equipements...)
-|-- reports.json           # Base de donnees des incidents (generee automatiquement)
-|-- requirements.txt       # Liste des dependances Python
-|
-|-- salleICS/              # Dossier contenant les emplois du temps (.ics)
-|   |-- 403.ics            # (Donnees fictives pour la demonstration)
-|   |-- ...
-|
-|-- templates/             # Vues HTML
-|   |-- base.html          # Structure principale
-|   |-- index.html         # Tableau de bord & Filtres
-|   |-- detail.html        # Vue detaillee d'une salle
-|   |-- login.html         # Page de connexion
-|   |-- tv.html            # Mode Affichage TV
-|   |-- acces_refuse.html  # Page de blocage IP
-|
-|-- generer_test.py        # Script utilitaire pour generer des faux plannings
+---
 
-========================================================================
-INSTALLATION ET DEMARRAGE
-========================================================================
+## STRUCTURE DU PROJET
 
-1. PREREQUIS
-   - Python 3.10 ou superieur.
-
-2. INSTALLATION DES DEPENDANCES
-   Ouvrez un terminal a la racine du projet et executez :
-   pip install -r requirements.txt
-
-   (Si le fichier requirements n'est pas present : pip install flask flask-login icalendar pytz)
-
-3. GENERATION DES DONNEES (DEMO)
-   Pour tester l'application avec des donnees simulees :
-   python generer_test.py
-
-4. LANCEMENT
-   python app.py
-
-   L'application sera accessible a l'adresse : http://127.0.0.1:5001
-
-========================================================================
-IDENTIFIANTS ET ACCES
-========================================================================
-
-1. COMPTES UTILISATEURS (Pour administration et consultation detaillee)
-
-ROLE        | IDENTIFIANT | MOT DE PASSE | DROITS
------------ | ----------- | ------------ | -------------------------------
-Admin       | admin       | iut          | Acces complet, detail des cours
-Etudiant    | etudiant    | salle        | Vue anonymisee (Occupé/Libre)
-
-2. ACCES AFFICHAGE DYNAMIQUE (TV)
-   - Pas d'identifiant requis.
-   - Acces via le bouton "Mode TV" sur la page de connexion.
-   - Acces direct via l'URL : /tv
-
-========================================================================
-NOTE SUR LA CONFIDENTIALITE (RGPD)
-========================================================================
-
-Ce code source contient uniquement des donnees fictives dans le dossier 
-/salleICS a des fins de demonstration technique.
-
-Dans un environnement de production, ce dossier doit etre peuple avec les 
-exports ICS reels de l'etablissement. Le fichier .gitignore doit etre 
-configure pour exclure ces fichiers reels du systeme de versionning.
-
-========================================================================
-AUTEUR ET DEVELOPPEMENT
-========================================================================
-
-Auteur : Heurtebise Johan
-Projet personnel developpe en autonomie (etudiant en BUT Reseaux & Telecoms).
-
-Note de developpement : 
-Ce projet a ete developpe avec l'assistance d'outils d'Intelligence Artificielle 
-pour l'optimisation des algorithmes de tri, la structure du code Flask et 
-la generation de la documentation technique.
+```text
+/SalleDispo
+│
+├── app.py                 # Coeur de l'application (Routes Flask, Logique metier, Securite)
+├── config.json            # Configuration des salles (Nombre de places, Equipements, Etage...)
+├── reports.json           # Base de donnees des incidents (generee automatiquement)
+├── requirements.txt       # Liste des dependances Python necessaires
+│
+├── salleICS/              # Dossier contenant les emplois du temps (.ics)
+│   ├── 403.ics            # (Fichiers fictifs pour la demonstration publique)
+│   └── ...
+│
+├── templates/             # Vues HTML (Templates Jinja2)
+│   ├── base.html          # Structure principale (Header, Navbar)
+│   ├── index.html         # Tableau de bord principal & Filtres
+│   ├── detail.html        # Vue detaillee d'une salle spécifique
+│   ├── login.html         # Page de connexion
+│   ├── tv.html            # Interface dediee au mode Affichage Dynamique
+│   └── acces_refuse.html  # Page de blocage pour le filtrage IP
+│
+└── generer_test.py        # Script utilitaire pour generer des faux plannings de test
