@@ -15,9 +15,9 @@ de l'etablissement en temps reel.
 L'objectif est d'optimiser l'occupation des locaux et de reduire le temps perdu 
 a chercher une salle disponible.
 
-========================================================================
+=====================
 CONTEXTE ET BESOIN
-========================================================================
+=====================
 
 1. LE PROBLEME
    - Les emplois du temps changent constamment.
