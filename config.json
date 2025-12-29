@@ -1,0 +1,154 @@
+{
+    "_README": "CECI EST UN FICHIER DE CONFIGURATION. Ne pas ajouter de vrais commentaires (//). True = Présent, False = Absent (Pour pc, projecteur, ...). Les valeurs de ce fichier sont fictives, donc à adapter aux salles réelles.",
+
+    "103": {
+        "nom_complet": "Salle TP Physique 103",
+        "places": 24,
+        "pc": false,
+        "projecteur": true,
+        "tableau": true,
+        "etage": 1,
+        "aile": "gauche",
+        "description": "Salle dédiée aux TP de Physique. Paillasses avec prises électriques."
+    },
+    "104": {
+        "nom_complet": "Salle TD 104",
+        "places": 30,
+        "pc": false,
+        "projecteur": true,
+        "tableau": true,
+        "etage": 1,
+        "aile": "droite",
+        "description": "Salle de cours standard pour les TD (Anglais, Communication)."
+    },
+    "105": {
+        "nom_complet": "Amphi 105",
+        "places": 60,
+        "pc": false,
+        "projecteur": true,
+        "tableau": true,
+        "etage": 1,
+        "aile": "gauche",
+        "description": "Petit amphithéâtre pour les Cours Magistraux (CM)."
+    },
+    "110": {
+        "nom_complet": "Salle TD 110",
+        "places": 28,
+        "pc": false,
+        "projecteur": true,
+        "tableau": true,
+        "etage": 1,
+        "aile": "droite",
+        "description": "Salle de TD classique."
+    },
+    "111": {
+        "nom_complet": "Salle TD 111",
+        "places": 28,
+        "pc": false,
+        "projecteur": true,
+        "tableau": true,
+        "etage": 1,
+        "aile": "gauche",
+        "description": "Salle de TD classique."
+    },
+    "121": {
+        "nom_complet": "Salle Cours 121",
+        "places": 40,
+        "pc": false,
+        "projecteur": true,
+        "tableau": true,
+        "etage": 1,
+        "aile": "gauche",
+        "description": "Grande salle de cours équipée pour la visio."
+    },
+    "132": {
+        "nom_complet": "Salle Examen 132",
+        "places": 35,
+        "pc": false,
+        "projecteur": false,
+        "tableau": true,
+        "etage": 1,
+        "aile": "droite",
+        "description": "Salle modulable, tables séparées pour examens."
+    },
+    "201": {
+        "nom_complet": "Labo Réseaux 201",
+        "places": 18,
+        "pc": true,
+        "projecteur": true,
+        "tableau": true,
+        "etage": 2,
+        "aile": "gauche",
+        "description": "Salle TP avec baies de brassage et matériel Cisco."
+    },
+    "202": {
+        "nom_complet": "Salle Informatique 202",
+        "places": 20,
+        "pc": true,
+        "projecteur": true,
+        "tableau": true,
+        "etage": 2,
+        "aile": "droite",
+        "description": "Salle TP Info standard (Dev Web, Java). Postes Linux/Windows."
+    },
+    "203": {
+        "nom_complet": "Labo Physique 203",
+        "places": 16,
+        "pc": true,
+        "projecteur": true,
+        "tableau": true,
+        "etage": 2,
+        "aile": "gauche",
+        "description": "Laboratoire d'électronique et optique."
+    },
+    "204": {
+        "nom_complet": "Salle Informatique 204",
+        "places": 24,
+        "pc": true,
+        "projecteur": true,
+        "tableau": true,
+        "etage": 2,
+        "aile": "droite",
+        "description": "Grande salle informatique double écran."
+    },
+    "205": {
+        "nom_complet": "Salle TD 205",
+        "places": 30,
+        "pc": false,
+        "projecteur": true,
+        "tableau": true,
+        "etage": 2,
+        "aile": "gauche",
+        "description": "Salle de cours théoriques (Droit, Gestion)."
+    },
+    "342": {
+        "nom_complet": "Salle TP 342",
+        "places": 20,
+        "pc": false,
+        "projecteur": true,
+        "tableau": true,
+        "etage": 3,
+        "aile": "droite",
+        "description": "Salle de travaux pratiques généraux."
+    },
+    "421": {
+        "nom_complet": "Salle Info Avancée 421",
+        "places": 15,
+        "pc": true,
+        "projecteur": true,
+        "tableau": true,
+        "etage": 4,
+        "aile": "gauche",
+        "description": "Salle spécialisée Base de Données et Virtualisation."
+    },
+    "501": {
+        "nom_complet": "Salle Réunion 501",
+        "places": 12,
+        "pc": false,
+        "projecteur": true,
+        "tableau": true,
+        "etage": 5,
+        "aile": "gauche",
+        "description": "Salle de réunion panoramique dernier étage."
+    }
+}
