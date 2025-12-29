@@ -1,0 +1,239 @@
+{% extends "base.html" %}
+
+{% block content %}
+<style>
+    /* CSS BARRE DATES */
+    .date-scroller { display: flex; overflow-x: auto; gap: 10px; padding-bottom: 10px; scrollbar-width: none; -ms-overflow-style: none; }
+    .date-scroller::-webkit-scrollbar { display: none; }
+    .date-btn { min-width: 75px; text-align: center; padding: 12px 5px; border-radius: 16px; background: white; border: 1px solid #e0e0e0; cursor: pointer; transition: 0.2s; flex-shrink: 0; }
+    .date-btn:hover { background: #f1f3f5; transform: translateY(-2px); }
+    .date-btn.active { background: #0d6efd; color: white; border-color: #0d6efd; box-shadow: 0 4px 12px rgba(13, 110, 253, 0.3); }
+    .date-btn .jour-nom { font-size: 0.75rem; text-transform: uppercase; font-weight: 700; }
+    .date-btn .jour-num { font-size: 1.3rem; font-weight: 700; line-height: 1.2; }
+
+    /* CSS BATIMENT & AILES */
+    .building-container { background-color: #f8f9fa; border: 2px solid #dee2e6; border-radius: 12px; padding: 10px; width: 140px; margin: 0 auto; box-shadow: 5px 5px 0px #e9ecef; }
+    .etage-bloc { background-color: white; border: 1px solid #e0e0e0; border-radius: 6px; margin-bottom: 4px; display: flex; justify-content: center; align-items: center; height: 40px; font-size: 0.9rem; font-weight: 500; }
+    .etage-bloc.active { background-color: #343a40; color: white; border-color: #343a40; font-weight: bold; transform: scale(1.05); }
+    
+    .wing-card { border-radius: 15px; padding: 20px; text-align: center; border: 2px dashed #e0e0e0; background: #fafafa; opacity: 0.5; transition: 0.3s; }
+    .wing-card.active { opacity: 1; border: 2px solid #0d6efd; background: #e7f1ff; color: #0d6efd; transform: scale(1.05); box-shadow: 0 5px 15px rgba(13, 110, 253, 0.2); }
+    .wing-icon { font-size: 2.5rem; margin-bottom: 10px; display: block; }
+    .wing-title { font-weight: bold; font-size: 0.9rem; }
+    .wing-desc { font-size: 0.7rem; color: inherit; }
+
+    .nav-tabs .nav-link { color: #6c757d; font-weight: 600; border: none; padding-bottom: 12px; }
+    .nav-tabs .nav-link.active { color: #0d6efd; border-bottom: 3px solid #0d6efd; background: transparent; }
+    .nav-tabs { border-bottom: 1px solid #eee; margin-bottom: 20px; }
+</style>
+
+<div class="row justify-content-center mt-3">
+    <div class="col-lg-4 mb-4">
+        <a href="/" class="btn btn-outline-secondary mb-3 rounded-pill px-4">
+            <i class="bi bi-arrow-left"></i> Retour
+        </a>
+
+        <div class="card border-0 shadow-sm text-center p-4 mb-3" style="border-radius: 20px;">
+            <div class="card-body">
+                <h2 class="fw-bold mb-3">{{ infos.nom_complet }}</h2>
+                <div class="mx-auto d-flex align-items-center justify-content-center mb-3 text-white shadow" 
+                     style="width: 120px; height: 120px; border-radius: 50%; font-size: 1.5rem; font-weight: bold; 
+                            background-color: var(--bs-{{ etat.color }});">
+                    {{ etat.etat }}
+                </div>
+                
+                <h5 class="fw-bold text-dark">{{ etat.msg }}</h5>
+                <p class="text-muted small mb-3">{{ etat.sub_msg }}</p>
+
+                {% if etat.etat == "OCCUPÉ" %}
+                    <div class="progress mt-3 shadow-sm" style="height: 10px; border-radius: 10px;">
+                        <div class="progress-bar progress-bar-striped progress-bar-animated bg-danger" 
+                             role="progressbar" style="width: {{ etat.progression }}%"></div>
+                    </div>
+                    <div class="d-flex justify-content-between mt-1">
+                        <small class="text-muted">Début</small>
+                        <small class="text-danger fw-bold">{{ etat.progression }}%</small>
+                        <small class="text-muted">Fin</small>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="card border-0 shadow-sm p-3 mb-3 overflow-hidden" style="border-radius: 20px;">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <h5 class="fw-bold m-0 fs-6"><i class="bi bi-exclamation-triangle-fill text-warning"></i> Signalements</h5>
+                <button class="btn btn-sm btn-outline-danger rounded-pill" data-bs-toggle="modal" data-bs-target="#modalSignalement">
+                    + Signaler
+                </button>
+            </div>
+
+            {% if incidents %}
+                <div class="bg-warning bg-opacity-10 border border-warning border-opacity-25 rounded-3 p-3 mt-2">
+                    {% for inc in incidents %}
+                        <div class="mb-2 border-bottom border-warning border-opacity-25 pb-2">
+                            <div class="d-flex justify-content-between">
+                                <strong class="text-dark small">{{ inc.type }}</strong>
+                                <span class="text-muted" style="font-size: 0.7rem;">{{ inc.date }}</span>
+                            </div>
+                            <p class="mb-0 small text-dark opacity-75 lh-sm">{{ inc.desc }}</p>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p class="text-muted small mb-0 fst-italic text-center py-2">
+                    <i class="bi bi-check-circle text-success"></i> Aucun problème signalé.
+                </p>
+            {% endif %}
+        </div>
+
+        <div class="card border-0 shadow-sm p-4" style="border-radius: 20px;">
+            <h5 class="fw-bold mb-3"><i class="bi bi-sliders"></i> Équipements</h5>
+            <div class="d-flex justify-content-between border-bottom pb-2 mb-2">
+                <span class="text-muted">Capacité</span><strong>{{ infos.places }} places</strong>
+            </div>
+            <div class="d-flex justify-content-between border-bottom pb-2 mb-2">
+                <span class="text-muted">PC Étudiant</span>
+                {% if infos.pc %}<span class="badge bg-success rounded-pill">Oui</span>{% else %}<span class="badge bg-secondary rounded-pill">Non</span>{% endif %}
+            </div>
+            <div class="d-flex justify-content-between mb-2 border-bottom pb-2">
+                <span class="text-muted">Vidéo-Proj</span>
+                {% if infos.projecteur %}<span class="badge bg-success rounded-pill">Oui</span>{% else %}<span class="badge bg-secondary rounded-pill">Non</span>{% endif %}
+            </div>
+            <div class="d-flex justify-content-between mb-2 border-bottom pb-2">
+                <span class="text-muted">Tableau</span>
+                {% if infos.tableau %}<span class="badge bg-success rounded-pill">Oui</span>{% else %}<span class="badge bg-secondary rounded-pill">Non</span>{% endif %}
+            </div>
+            <p class="small text-muted mt-2 mb-0">{{ infos.description }}</p>
+        </div>
+    </div>
+
+    <div class="col-lg-8">
+        <div class="card border-0 shadow-sm p-4" style="border-radius: 20px; min-height: 600px;">
+            <ul class="nav nav-tabs" id="myTab" role="tablist">
+                <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#planning"><i class="bi bi-calendar-week"></i> Planning</button></li>
+                <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#plan"><i class="bi bi-building"></i> Localisation</button></li>
+            </ul>
+
+            <div class="tab-content" id="myTabContent">
+                <div class="tab-pane fade show active" id="planning">
+                    <div id="date-container" class="date-scroller mb-4 pb-2"></div>
+                    <h5 id="date-titre" class="fw-bold text-dark mb-3 border-bottom pb-2">Aujourd'hui</h5>
+                    <div id="cours-container"></div>
+                </div>
+
+                <div class="tab-pane fade" id="plan">
+                    <div class="text-center pt-3">
+                        <h5 class="fw-bold mb-4">Où se trouve la salle ?</h5>
+                        <div class="row align-items-center justify-content-center g-3">
+                            <div class="col-4">
+                                <div class="wing-card {% if aile == 'gauche' %}active{% endif %}">
+                                    <i class="bi bi-arrow-left-circle-fill wing-icon"></i>
+                                    <div class="wing-title">Aile Gauche</div><div class="wing-desc">Salles Impaires</div>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="building-container">
+                                    {% for i in range(4, -1, -1) %}
+                                        <div class="etage-bloc {% if i == etage_courant %}active{% endif %}">
+                                            {% if i == 0 %}RDC{% else %}Étage {{ i }}{% endif %}
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="wing-card {% if aile == 'droite' %}active{% endif %}">
+                                    <i class="bi bi-arrow-right-circle-fill wing-icon"></i>
+                                    <div class="wing-title">Aile Droite</div><div class="wing-desc">Salles Paires</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="alert alert-light border shadow-sm mt-5 text-start mx-auto" style="max-width: 500px;">
+                            <h4 class="fw-bold text-primary mb-2">
+                                <i class="bi bi-geo-alt-fill"></i> {% if etage_courant == 0 %}RDC{% else %}Étage {{ etage_courant }}{% endif %} - Aile {{ aile|capitalize }}
+                            </h4>
+                            <p class="mb-0 text-muted">Prenez l'ascenseur jusqu'au niveau <strong>{{ etage_courant }}</strong>, puis dirigez-vous vers la <strong>{{ aile }}</strong>.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modalSignalement" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg rounded-4">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold">⚠️ Signaler un problème</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form action="/signaler/{{ nom }}" method="POST">
+                <div class="modal-body">
+                    <p class="text-muted small">Décrivez le problème pour la maintenance.</p>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold small">Type</label>
+                        <select class="form-select" name="type_probleme" required>
+                            <option value="Matériel Info">💻 Panne PC / Écran</option>
+                            <option value="Vidéo-Projecteur">📽️ Vidéo-Projecteur</option>
+                            <option value="Mobilier">🪑 Mobilier cassé</option>
+                            <option value="Ménage">🧹 Ménage / Propreté</option>
+                            <option value="Autre">📝 Autre</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold small">Description</label>
+                        <textarea class="form-control" name="description" rows="3" placeholder="Ex: Le PC 12 ne démarre pas..." required></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer border-0 pt-0">
+                    <button type="button" class="btn btn-light rounded-pill" data-bs-dismiss="modal">Annuler</button>
+                    <button type="submit" class="btn btn-danger rounded-pill px-4">Envoyer</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    const allEvents = {{ planning | tojson }};
+    function formatDateISO(date) { return date.toISOString().split('T')[0]; }
+    function initDateBar() {
+        const container = document.getElementById('date-container');
+        const today = new Date();
+        for (let i = 0; i < 15; i++) {
+            let d = new Date(); d.setDate(today.getDate() + i);
+            let isoDate = formatDateISO(d);
+            let jourNom = d.toLocaleDateString('fr-FR', { weekday: 'short' }).replace('.', '');
+            let jourNum = d.toLocaleDateString('fr-FR', { day: 'numeric' });
+            let btn = document.createElement('div');
+            btn.className = `date-btn ${i === 0 ? 'active' : ''}`;
+            btn.innerHTML = `<div class="jour-nom">${jourNom}</div><div class="jour-num">${jourNum}</div>`;
+            btn.onclick = () => selectDate(isoDate, btn);
+            container.appendChild(btn);
+        }
+        renderEvents(formatDateISO(today));
+    }
+    function selectDate(dateIso, btnElement) {
+        document.querySelectorAll('.date-btn').forEach(b => b.classList.remove('active'));
+        btnElement.classList.add('active');
+        renderEvents(dateIso);
+    }
+    function renderEvents(dateIso) {
+        const container = document.getElementById('cours-container');
+        const titre = document.getElementById('date-titre');
+        container.innerHTML = ''; 
+        const eventsDuJour = allEvents.filter(e => e.date_iso === dateIso);
+        const optionsDate = { weekday: 'long', day: 'numeric', month: 'long' };
+        titre.innerText = new Date(dateIso).toLocaleDateString('fr-FR', optionsDate).replace(/^\w/, c => c.toUpperCase());
+        if (eventsDuJour.length === 0) {
+            container.innerHTML = `<div class="text-center py-5 text-muted"><i class="bi bi-cup-hot h1 text-secondary" style="opacity:0.3"></i><p class="mt-3 fw-light">Aucun cours prévu.</p></div>`;
+            return;
+        }
+        eventsDuJour.forEach(cours => {
+            const html = `<div class="d-flex mb-3 align-items-center"><div class="text-end me-3" style="min-width: 90px;"><div class="fw-bold text-dark fs-5">${cours.horaire.split('-')[0]}</div><div class="small text-muted">${cours.horaire.split('-')[1]}</div></div><div class="me-3 position-relative"><div class="bg-primary rounded-circle" style="width: 12px; height: 12px;"></div><div class="bg-light position-absolute" style="width: 2px; top: 12px; bottom: -25px; left: 5px; z-index: -1;"></div></div><div class="card flex-grow-1 border-0 bg-light p-3 shadow-sm card-hover" style="border-radius: 12px;"><span class="fw-bold text-dark text-truncate">${cours.titre}</span></div></div>`;
+            container.innerHTML += html;
+        });
+    }
+    document.addEventListener('DOMContentLoaded', initDateBar);
+</script>
+{% endblock %}

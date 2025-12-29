@@ -1,0 +1,251 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="row g-3 mb-4">
+    
+    <div class="col-md-4 col-sm-6">
+        <div class="glass p-3 rounded-4 d-flex align-items-center justify-content-between">
+            <div>
+                <div class="text-muted small fw-bold">TOTAL SALLES</div>
+                <div class="h3 fw-bold mb-0">{{ salles|length }}</div>
+            </div>
+            <div class="bg-primary bg-opacity-10 text-primary p-3 rounded-circle">
+                <i class="bi bi-building h4 m-0"></i>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4 col-sm-6">
+        <div class="glass p-3 rounded-4 d-flex align-items-center justify-content-between">
+            <div>
+                <div class="text-muted small fw-bold">LIBRES MAINTENANT</div>
+                <div class="h3 fw-bold mb-0 text-success">
+                    {# 
+                       NOTE TECHNIQUE JINJA2 :
+                       Les variables simples dans une boucle for ont une portée locale.
+                       On utilise 'namespace' pour pouvoir incrémenter un compteur global depuis l'intérieur de la boucle.
+                    #}
+                    {% set libres = namespace(count=0) %}
+                    {% for s in salles %}
+                        {% if s.status.etat == 'LIBRE' %}
+                            {% set libres.count = libres.count + 1 %}
+                        {% endif %}
+                    {% endfor %}
+                    {{ libres.count }}
+                </div>
+            </div>
+            <div class="bg-success bg-opacity-10 text-success p-3 rounded-circle">
+                <i class="bi bi-check-lg h4 m-0"></i>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4 col-sm-12">
+        <div class="glass p-3 rounded-4 d-flex align-items-center justify-content-between">
+            <div>
+                <div class="text-muted small fw-bold">OCCUPÉES</div>
+                <div class="h3 fw-bold mb-0 text-danger">
+                    {# Calcul simple : Total - Libres #}
+                    {{ salles|length - libres.count }}
+                </div>
+            </div>
+            <div class="bg-danger bg-opacity-10 text-danger p-3 rounded-circle">
+                <i class="bi bi-x-lg h4 m-0"></i>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    
+    <div class="col-lg-3 mb-4">
+        <div class="glass rounded-4 p-4 sticky-top" style="top: 90px; z-index: 100;">
+            
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="fw-bold m-0"><i class="bi bi-sliders2"></i> Filtres</h5>
+                {% if q or f_pc or f_proj or f_etage or f_aile or f_heure_debut or f_duree %}
+                    <a href="/" class="text-danger small text-decoration-none">Reset</a>
+                {% endif %}
+            </div>
+
+            <form action="/" method="GET" id="searchForm">
+                
+                <div class="mb-3">
+                    <input type="text" name="q" class="form-control rounded-pill bg-transparent border-secondary" placeholder="🔍 N° Salle..." value="{{ q or '' }}">
+                </div>
+
+                <div class="mb-3 p-3 rounded-3 bg-light bg-opacity-50">
+                    <div class="form-check form-switch mb-2">
+                        <input class="form-check-input" type="checkbox" name="pc" id="checkPC" {% if f_pc %}checked{% endif %} onchange="this.form.submit()">
+                        <label class="form-check-label small" for="checkPC">Avec PC</label>
+                    </div>
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" name="proj" id="checkProj" {% if f_proj %}checked{% endif %} onchange="this.form.submit()">
+                        <label class="form-check-label small" for="checkProj">Avec Projecteur</label>
+                    </div>
+                </div>
+
+                <select class="form-select form-select-sm mb-2 rounded-3" name="etage" onchange="this.form.submit()">
+                    <option value="">🏢 Tous les étages</option>
+                    <option value="0" {% if f_etage == '0' %}selected{% endif %}>Rez-de-chaussée</option>
+                    <option value="1" {% if f_etage == '1' %}selected{% endif %}>Étage 1</option>
+                    <option value="2" {% if f_etage == '2' %}selected{% endif %}>Étage 2</option>
+                    <option value="3" {% if f_etage == '3' %}selected{% endif %}>Étage 3</option>
+                    <option value="4" {% if f_etage == '4' %}selected{% endif %}>Étage 4</option>
+                </select>
+
+                <select class="form-select form-select-sm mb-3 rounded-3" name="aile" onchange="this.form.submit()">
+                    <option value="">↔️ Toutes les ailes</option>
+                    <option value="gauche" {% if f_aile == 'gauche' %}selected{% endif %}>Aile Gauche</option>
+                    <option value="droite" {% if f_aile == 'droite' %}selected{% endif %}>Aile Droite</option>
+                </select>
+
+                <div class="border-top pt-3">
+                    <label class="form-label small fw-bold text-muted">DISPONIBILITÉ</label>
+                    <div class="input-group input-group-sm mb-2">
+                        <input type="number" class="form-control" name="duree_min" placeholder="Min" value="{{ f_duree or '' }}">
+                        <span class="input-group-text">min</span>
+                    </div>
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary btn-sm rounded-pill">Filtrer</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="col-lg-9">
+        <div class="row g-3" id="sallesContainer">
+            
+            {% for salle in salles %}
+            <div class="col-md-6 col-xl-4 salle-card" data-nom="{{ salle.nom }}">
+                <div class="card h-100 border-0 glass card-hover rounded-4 overflow-hidden position-relative">
+                    
+                    <a href="/salle/{{ salle.fichier }}" class="text-decoration-none text-reset d-block h-100 p-4">
+                        
+                        <div class="d-flex justify-content-between align-items-start mb-3">
+                            <div>
+                                <h4 class="fw-bold mb-1">{{ salle.infos.nom_complet }}</h4>
+                                <div class="small text-muted">
+                                    {% if salle.infos.aile_calc == 'gauche' %}⬅️ Gauche{% else %}➡️ Droite{% endif %}
+                                    • Étage {{ salle.infos.etage_calc }}
+                                </div>
+                            </div>
+                            <i class="bi bi-star-fill h4 fav-btn text-muted position-relative" 
+                               style="z-index: 10;" 
+                               onclick="toggleFav(event, '{{ salle.nom }}')"></i>
+                        </div>
+
+                        <div class="mb-3 d-flex gap-1">
+                            {% if salle.infos.pc %}
+                                <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25" title="PC"><i class="bi bi-pc-display"></i></span>
+                            {% endif %}
+                            {% if salle.infos.projecteur %}
+                                <span class="badge bg-info bg-opacity-10 text-info border border-info border-opacity-25" title="Projo"><i class="bi bi-projector"></i></span>
+                            {% endif %}
+                            
+                            {% if salle.infos.has_issue %}
+                                <span class="badge bg-warning text-dark border border-warning" title="Incident signalé">
+                                    <i class="bi bi-exclamation-triangle-fill"></i>
+                                </span>
+                            {% endif %}
+                        </div>
+
+                        <div class="mt-auto">
+                            {% if salle.status.etat == "OCCUPÉ" %}
+                                <div class="d-flex justify-content-between align-items-end mb-1">
+                                    <span class="text-danger fw-bold small">Occupé</span>
+                                    <span class="text-muted small">{{ salle.status.sub_msg }}</span>
+                                </div>
+                                <div class="progress" style="height: 6px; border-radius: 10px;">
+                                    <div class="progress-bar bg-danger" style="width: {{ salle.status.progression }}%"></div>
+                                </div>
+                            {% else %}
+                                <div class="alert alert-success py-2 px-3 mb-0 rounded-3 border-0 bg-opacity-10 d-flex align-items-center gap-2">
+                                    <div class="spinner-grow spinner-grow-sm text-success" role="status"></div>
+                                    <span class="small fw-bold text-success">Libre • {{ salle.status.sub_msg }}</span>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </a>
+                </div>
+            </div>
+            
+            {% else %}
+            <div class="col-12 text-center py-5">
+                <i class="bi bi-search display-1 text-muted opacity-25"></i>
+                <p class="mt-3 text-muted">Aucune salle trouvée.</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<script>
+    // --- GESTION DES FAVORIS (LOCALSTORAGE) ---
+    // Permet de sauvegarder les salles préférées dans le navigateur de l'utilisateur
+    // sans avoir besoin de créer un compte en base de données.
+
+    function toggleFav(e, nomSalle) {
+        e.preventDefault(); // Empêche le clic d'ouvrir la page de détail
+        e.stopPropagation();
+
+        // Récupération du tableau existant ou création d'un nouveau
+        let favs = JSON.parse(localStorage.getItem('favoris') || '[]');
+        const index = favs.indexOf(nomSalle);
+
+        if (index === -1) {
+            favs.push(nomSalle); // Ajouter aux favoris
+        } else {
+            favs.splice(index, 1); // Retirer des favoris
+        }
+        
+        // Sauvegarde et mise à jour de l'interface
+        localStorage.setItem('favoris', JSON.stringify(favs));
+        updateFavIcons();
+        trierSalles(); // Réorganiser pour mettre les favoris en haut
+    }
+
+    // Met à jour la couleur de l'étoile (Jaune = Actif / Gris = Inactif)
+    function updateFavIcons() {
+        const favs = JSON.parse(localStorage.getItem('favoris') || '[]');
+        document.querySelectorAll('.salle-card').forEach(card => {
+            const nom = card.dataset.nom;
+            const icon = card.querySelector('.fav-btn');
+            if (favs.includes(nom)) {
+                icon.classList.add('active'); // Classe CSS définie dans base.html
+            } else {
+                icon.classList.remove('active');
+            }
+        });
+    }
+
+    // Trie dynamiquement le DOM pour afficher les favoris en premier
+    function trierSalles() {
+        const favs = JSON.parse(localStorage.getItem('favoris') || '[]');
+        const container = document.getElementById('sallesContainer');
+        const cards = Array.from(container.children);
+
+        cards.sort((a, b) => {
+            const aFav = favs.includes(a.dataset.nom);
+            const bFav = favs.includes(b.dataset.nom);
+            
+            // Logique de tri : Favoris (-1) monte, Non-favori (1) descend
+            if (aFav && !bFav) return -1; 
+            if (!aFav && bFav) return 1;  
+            return 0; // Si égalité, on garde l'ordre alphabétique initial
+        });
+
+        // Réinjection des cartes triées dans le conteneur
+        cards.forEach(card => container.appendChild(card));
+    }
+
+    // Initialisation au chargement de la page
+    document.addEventListener('DOMContentLoaded', () => {
+        updateFavIcons();
+        trierSalles();
+    });
+</script>
+
+{% endblock %}

@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="fr" data-bs-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SalleDispo - Affichage Dynamique</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    
+    <style>
+        /* --- CONFIGURATION GLOBALE --- */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #000;
+            color: #fff;
+            overflow: hidden;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* --- EN-TÊTE FIXE --- */
+        .tv-header {
+            padding: 20px 40px;
+            background: #111;
+            border-bottom: 2px solid #222;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 10;
+            height: 100px;
+            flex-shrink: 0;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+
+        .tv-clock { 
+            font-size: 3.5rem; 
+            font-weight: 900; 
+            color: #0d6efd; 
+            font-variant-numeric: tabular-nums;
+            text-shadow: 0 0 15px rgba(13, 110, 253, 0.4);
+        }
+        
+        .tv-date { 
+            font-size: 1.4rem; 
+            color: #888; 
+            text-transform: uppercase; 
+            letter-spacing: 2px; 
+            font-weight: 600;
+        }
+
+        /* --- GRILLE DES SALLES --- */
+        .tv-grid-container {
+            flex-grow: 1;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .tv-grid {
+            padding: 30px;
+            display: grid;
+            /* Minimum 300px de large par carte */
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            padding-bottom: 80px;
+        }
+
+        /* --- CARTES DES SALLES --- */
+        .tv-card {
+            background: #1a1a1a;
+            border-radius: 18px;
+            padding: 25px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            border: 2px solid transparent;
+            min-height: 200px; /* Hauteur minimale garantie */
+            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+            animation: fadeIn 0.8s ease-out forwards;
+            opacity: 0;
+        }
+
+        /* Styles d'états */
+        .status-libre {
+            border-color: #198754;
+            background: radial-gradient(circle at top right, rgba(25, 135, 84, 0.2), #1a1a1a 70%);
+            box-shadow: 0 0 30px rgba(25, 135, 84, 0.15);
+        }
+
+        .status-bientot {
+            border-color: #fd7e14;
+            background: radial-gradient(circle at top right, rgba(253, 126, 20, 0.15), #1a1a1a 70%);
+        }
+
+        .status-occupe {
+            border-color: #333;
+            background: #151515;
+            opacity: 0.6;
+        }
+
+        /* --- CORRECTION NOM DE LA SALLE --- */
+        .room-name { 
+            font-size: 2.1rem; /* Réduit un peu (était 2.5rem) pour que ça rentre mieux */
+            font-weight: 900; 
+            line-height: 1.1; /* Interligne serré */
+            margin-bottom: 10px; 
+            letter-spacing: -1px;
+            
+            /* Autoriser le texte à aller à la ligne */
+            white-space: normal; 
+            word-wrap: break-word;
+            
+            /* Ne jamais cacher le texte */
+            overflow: visible; 
+            text-overflow: clip; 
+        }
+
+        .room-info { font-size: 1.1rem; color: #aaa; font-weight: 500; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+        
+        .room-status { font-size: 1.5rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; }
+
+        .progress-tv { height: 8px; background: #333; border-radius: 4px; margin-top: 15px; overflow: hidden; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .refresh-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            height: 4px;
+            background: #0d6efd;
+            width: 0%;
+            z-index: 100;
+            transition: width linear;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="tv-header">
+        <div class="d-flex align-items-center gap-4">
+            <div class="bg-primary bg-opacity-10 p-3 rounded-4">
+                <i class="bi bi-grid-fill text-primary" style="font-size: 2.5rem;"></i>
+            </div>
+            <div>
+                <h1 class="m-0 fw-bold lh-1" style="font-size: 2.2rem; letter-spacing: -1px;">DISPO SALLES</h1>
+                <span class="tv-date" id="dateDisplay">CHARGEMENT...</span>
+            </div>
+        </div>
+        <div class="tv-clock" id="clockDisplay">--:--</div>
+    </div>
+
+    <div class="tv-grid-container" id="scrollContainer">
+        <div class="tv-grid">
+            
+            {% for salle in salles %}
+                {% if salle.status.etat == "LIBRE" %}
+                    <div class="tv-card status-libre" style="animation-delay: {{ loop.index0 * 0.05 }}s;">
+                        <div>
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div class="room-name text-white">{{ salle.infos.nom_complet.replace('Salle ', '') }}</div>
+                                <i class="bi bi-check-circle-fill text-success ms-2" style="font-size: 2.2rem; flex-shrink: 0;"></i>
+                            </div>
+                            <div class="room-info mt-2">
+                                <span class="badge bg-dark border border-secondary">Étage {{ salle.infos.etage_calc }}</span>
+                                {% if salle.infos.pc %}<i class="bi bi-pc-display"></i> PC{% endif %}
+                                {% if salle.infos.projecteur %}<i class="bi bi-projector"></i> TV{% endif %}
+                            </div>
+                        </div>
+                        <div>
+                            <div class="room-status text-success mt-3">DISPONIBLE</div>
+                            <div class="small text-white opacity-75">{{ salle.status.sub_msg }}</div>
+                        </div>
+                    </div>
+
+                {% elif salle.status.etat == "OCCUPÉ" and salle.status.progression > 85 %}
+                    <div class="tv-card status-bientot" style="animation-delay: {{ loop.index0 * 0.05 }}s;">
+                        <div>
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div class="room-name text-white">{{ salle.infos.nom_complet.replace('Salle ', '') }}</div>
+                                <span class="badge bg-warning text-dark fw-bold fs-6 mt-1 ms-2">Bientôt</span>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="text-warning fw-bold small mb-1">{{ salle.status.sub_msg }}</div>
+                            <div class="progress-tv">
+                                <div class="h-100 bg-warning" style="width: {{ salle.status.progression }}%"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                {% else %}
+                    <div class="tv-card status-occupe" style="animation-delay: {{ loop.index0 * 0.05 }}s;">
+                        <div>
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div class="room-name text-muted">{{ salle.infos.nom_complet.replace('Salle ', '') }}</div>
+                                <span class="badge bg-dark border border-secondary text-secondary mt-1 ms-2">OCCUPÉ</span>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="text-danger fw-bold small mb-1">{{ salle.status.sub_msg }}</div>
+                            <div class="progress-tv">
+                                <div class="h-100 bg-danger" style="width: {{ salle.status.progression }}%"></div>
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
+            {% endfor %}
+
+        </div>
+    </div>
+
+    <div class="refresh-bar" id="refreshBar"></div>
+
+    <script>
+        // HORLOGE
+        function updateClock() {
+            const now = new Date();
+            document.getElementById('clockDisplay').textContent = now.toLocaleTimeString('fr-FR', {hour: '2-digit', minute:'2-digit'});
+            document.getElementById('dateDisplay').textContent = now.toLocaleDateString('fr-FR', {weekday: 'long', day: 'numeric', month: 'long'});
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+
+        // RELOAD (2 min)
+        const RELOAD_TIME = 120000;
+        const refreshBar = document.getElementById('refreshBar');
+        refreshBar.style.transition = `width ${RELOAD_TIME}ms linear`;
+        setTimeout(() => { refreshBar.style.width = '100%'; }, 100);
+        setTimeout(() => window.location.reload(), RELOAD_TIME);
+
+        // AUTO-SCROLL
+        const container = document.getElementById('scrollContainer');
+        const scrollSpeedDesc = 1; 
+        const scrollSpeedAsc = 2;  
+        const pauseTime = 5000;    
+        let direction = 1; 
+        let isPaused = false;
+
+        function autoScroll() {
+            if (container.scrollHeight <= container.clientHeight) return;
+            if (isPaused) return;
+
+            if (direction === 1) {
+                container.scrollTop += scrollSpeedDesc;
+                if (container.scrollTop + container.clientHeight >= container.scrollHeight - 2) {
+                    isPaused = true;
+                    setTimeout(() => { direction = -1; isPaused = false; }, pauseTime);
+                }
+            } else {
+                container.scrollTop -= scrollSpeedAsc;
+                if (container.scrollTop <= 0) {
+                    isPaused = true;
+                    setTimeout(() => { direction = 1; isPaused = false; }, pauseTime);
+                }
+            }
+        }
+
+        setTimeout(() => { setInterval(autoScroll, 20); }, 3000);
+    </script>
+</body>
+</html>
