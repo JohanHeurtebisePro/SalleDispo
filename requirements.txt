@@ -1,0 +1,4 @@
+Flask==3.0.0
+Flask-Login==0.6.3
+icalendar==5.0.11
+pytz==2023.3.post1
