@@ -58,6 +58,25 @@ Une interface spécifique dédiée aux écrans TV présents dans les halls d'ent
 
 ---
 
+## INSTALLATION ET UTILISATION (WINDOWS)
+
+Suivez ces étapes pour faire fonctionner l'application sur votre machine locale.
+
+### 1. Prérequis
+* **Python 3.10 ou supérieur** : Assurez-vous d'avoir coché la case "Add Python to PATH" lors de l'installation.
+* **Pip** : Le gestionnaire de paquets Python (installé par défaut avec Python).
+
+### 2. Téléchargement et Installation
+Ouvrez un terminal (Invite de commandes ou PowerShell) dans le dossier du projet :
+
+```cmd
+# 1. Installer les dépendances nécessaires
+pip install -r requirements.txt
+
+# 2. Générer les fichiers de test (Optionnel)
+# Si vous n'avez pas encore de fichiers .ics, lancez ce script pour remplir le dossier salleICS
+python generer_test.py
+
 ## STRUCTURE DU PROJET
 
 ```text
